@@ -26,23 +26,28 @@
       <tr v-for="item,index in data" :key="index">
         <td>{{ item.market_cap_rank }}</td>
         <td>
-          <img src="item.image" alt="">
-          {{ item.symbol }}
-          {{ item.name }}
+          <img :src="item.image" :alt="item.symbol">
+          <div class="detail">
+            <div class="name">{{ item.name }}</div>
+            <div class="symbol">{{ toUpperCase(item.symbol) }}</div>
+          </div>
         </td>
         <td>{{ toUSD(item.current_price) }}</td>
         <td>{{ roundDecimal(item.price_change_percentage_24h_in_currency, 1) }}</td>
         <td>{{ roundDecimal(item.price_change_percentage_7d_in_currency, 1) }}</td>
         <td>{{ toUSD(item.market_cap) }}</td>
         <td>{{ toUSD(item.total_volume) }}</td>
-        <!-- <td>{{ item.market_cap_rank }}</td> -->
       </tr>
     </tbody>
   </table>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {
+  ref, onMounted,
+  reactive, watchEffect,
+} from 'vue';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'CryptoTable',
@@ -50,10 +55,18 @@ export default {
     const data = ref(null);
     const loading = ref(true);
     const error = ref(null);
+    const route = useRoute();
+
+    const queryParams = reactive({
+      page: route.query.page || 1,
+      // anotherLocale: computed(() => locales.find((el) => el.value !== locale.value)),
+    });
+
+    watchEffect(() => console.log(queryParams.page));
 
     function fetchData() {
       loading.value = true;
-      return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=7d%2C24h', {
+      return fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=${queryParams.page}&sparkline=false&price_change_percentage=7d%2C24h`, {
         method: 'get',
         headers: {
           'content-type': 'application/json',
@@ -72,9 +85,6 @@ export default {
         })
         .then((json) => {
           data.value = json;
-          console.log(json);
-          console.log(data);
-          console.log(data.value);
         })
         .catch((err) => {
           error.value = err;
@@ -99,6 +109,10 @@ export default {
       return `${result}%`;
     }
 
+    function toUpperCase(string) {
+      return string.toUpperCase();
+    }
+
     onMounted(() => {
       fetchData();
     });
@@ -109,6 +123,7 @@ export default {
       error,
       toUSD,
       roundDecimal,
+      toUpperCase,
     };
   },
 };
@@ -131,8 +146,51 @@ export default {
       font-size: 14px;
       color: #FFFFFF;
       letter-spacing: 0;
-      text-align: right;
       font-weight: 400;
+      padding: 20px 0px;
+    }
+
+    th, td {
+      &:nth-child(1),
+      &:nth-child(4),
+      &:nth-child(5) {
+        text-align: center;
+      }
+      &:nth-child(2) {
+        text-align: left;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        img {
+          width: 24px;
+          height: 24px;
+        }
+        .detail {
+          margin-left: 7px;
+          .symbol {
+            font-family: Helvetica;
+            font-size: 12px;
+            color: #929292;
+            letter-spacing: 0;
+            font-weight: 400;
+            margin-top: 2px;
+          }
+
+          .name {
+            font-family: Helvetica-Bold;
+            font-size: 16px;
+            color: #FFFFFF;
+            letter-spacing: 0;
+            font-weight: 700;
+          }
+        }
+      }
+      &:nth-child(3),
+      &:nth-child(6),
+      &:nth-child(7),
+      &:nth-child(8) {
+        text-align: right;
+      }
     }
   }
 </style>
