@@ -40,7 +40,7 @@
       </tr>
     </tbody>
   </table>
-  <div v-show="!loading" class='wrapper'>
+  <div class='wrapper'>
     <v-pagination
       v-model='queryParams.page'
       :pages='pages'
@@ -71,10 +71,11 @@ export default {
     const error = ref(null);
     const pages = ref(100);
     const route = useRoute();
+    const routePage = route.query.page;
     const router = useRouter();
 
     const queryParams = reactive({
-      page: Number.isNaN(route.query.page) ? 1 : Number.parseInt(route.query.page, 10),
+      page: Number.isNaN(routePage) || routePage === undefined ? 1 : Number.parseInt(routePage, 10),
     });
 
     function fetchData() {
