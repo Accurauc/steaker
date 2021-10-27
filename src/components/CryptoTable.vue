@@ -23,10 +23,10 @@
       <col style='width: 42px;'>
       <col style='width: 112px;'>
       <col style='width: 129px;'>
-      <col style='width: 61px;'>
-      <col style='width: 65px;'>
+      <col style='width: 70px;'>
+      <col style='width: 75px;'>
       <col style='width: 137px;'>
-      <col style='width: 127px;'>
+      <col style='width: 150px;'>
       <col style='width: 197px;'>
     </colgroup>
     <tbody>
@@ -238,7 +238,7 @@ export default {
 <style scoped lang='scss'>
   table {
     margin: auto;
-    min-width: 871px;
+    min-width: 912px;
     background: #17171A;
     th {
       font-family: Helvetica-Bold;
