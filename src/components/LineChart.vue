@@ -4,7 +4,7 @@
 
 <script>
 import * as d3 from 'd3';
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 
 export default {
   props: ['dataset', 'color', 'index'],
@@ -91,9 +91,12 @@ export default {
 
       return svg.node();
     }
-    onMounted(() => {
-      const bodySelection = document.querySelector(`#line-${props.index}`);
-      const chart = LineChart(props.dataset, {
+    function renderChart(data) {
+      const el = document.querySelector(`#line-${props.index}`);
+      if (el.hasChildNodes()) {
+        el.removeChild(el.childNodes[0]);
+      }
+      const chart = LineChart(data, {
         x: (d, i) => i,
         y: (d) => d,
         yLabel: '',
@@ -101,7 +104,14 @@ export default {
         height: 48,
         color: props.color,
       });
-      bodySelection.append(chart);
+      el.append(chart);
+    }
+    onMounted(() => {
+      renderChart(props.dataset);
+    });
+
+    watch(() => props.dataset, (first, second) => {
+      renderChart(second);
     });
     return {
     };
