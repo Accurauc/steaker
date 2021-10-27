@@ -2,13 +2,20 @@
   <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>{{ $t('name') }}</th>
-        <th>{{ $t('price') }}</th>
-        <th>{{ $t('24h') }}</th>
-        <th>{{ $t('7d') }}</th>
-        <th>{{ $t('market-cap') }}</th>
-        <th>{{ $t('volume') }}</th>
+        <th :class="handleThClass('rank')"
+            @click="handleChangeSort('rank')">#</th>
+        <th :class="handleThClass('name')"
+            @click="handleChangeSort('name')">{{ $t('name') }}</th>
+        <th :class="handleThClass('price')"
+            @click="handleChangeSort('price')">{{ $t('price') }}</th>
+        <th :class="handleThClass('24h')"
+            @click="handleChangeSort('24h')">{{ $t('24h') }}</th>
+        <th :class="handleThClass('7d')"
+            @click="handleChangeSort('7d')">{{ $t('7d') }}</th>
+        <th :class="handleThClass('marketCap')"
+            @click="handleChangeSort('marketCap')">{{ $t('market-cap') }}</th>
+        <th :class="handleThClass('volume')"
+            @click="handleChangeSort('volume')">{{ $t('volume') }}</th>
         <th>{{ $t('l7d') }}</th>
       </tr>
     </thead>
@@ -23,7 +30,7 @@
       <col style='width: 147px;'>
     </colgroup>
     <tbody>
-      <tr v-for='item,index in data' :key='index'>
+      <tr v-for='item,index in state.sortedData' :key='index'>
         <td>{{ item.market_cap_rank }}</td>
         <td>
           <img :src='item.image' :alt='item.symbol'>
@@ -44,7 +51,7 @@
   </table>
   <div class='wrapper'>
     <v-pagination
-      v-model='queryParams.page'
+      v-model='state.page'
       :pages='pages'
       :range-size='1'
       active-color='#DCEDFF'
@@ -56,7 +63,7 @@
 <script>
 import {
   ref, onMounted,
-  reactive,
+  reactive, computed,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import VPagination from '@hennge/vue3-pagination';
@@ -68,22 +75,62 @@ export default {
     VPagination,
   },
   setup() {
-    const data = ref(null);
+    const data = ref([]);
     const loading = ref(true);
     const error = ref(null);
     const pages = ref(100);
+    const sortBy = ref({
+      sort: 'market_cap_rank',
+      order: true,
+    });
     const route = useRoute();
     const { query, path, hash } = route;
     const router = useRouter();
+    const sortMapper = new Map([
+      ['rank', 'market_cap_rank'],
+      ['name', 'name'],
+      ['price', 'current_price'],
+      ['24h', 'price_change_percentage_24h_in_currency'],
+      ['7d', 'price_change_percentage_7d_in_currency'],
+      ['marketCap', 'market_cap'],
+      ['volume', 'total_volume'],
+    ]);
 
-    const queryParams = reactive({
+    const state = reactive({
       page: Number.isNaN(query.page)
             || query.page === undefined ? 1 : Number.parseInt(query.page, 10),
+      sortedData: computed(() => [...data.value].sort((a, b) => {
+        let aValue = a[sortBy.value.sort];
+        let bValue = b[sortBy.value.sort];
+        if (sortBy.value.sort === 'name') {
+          aValue = aValue.toUpperCase();
+          bValue = bValue.toUpperCase();
+
+          if (sortBy.value.order) {
+            if (aValue > bValue) return -1;
+            if (bValue > aValue) return 1;
+          } else {
+            if (aValue > bValue) return 1;
+            if (bValue > aValue) return -1;
+          }
+        }
+
+        if (sortBy.value.sort === 'market_cap_rank') {
+          if (sortBy.value.order) {
+            return aValue - bValue;
+          }
+          return bValue - aValue;
+        }
+        if (sortBy.value.order) {
+          return bValue - aValue;
+        }
+        return aValue - bValue;
+      })),
     });
 
     function fetchData() {
       loading.value = true;
-      return fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=${queryParams.page}&sparkline=false&price_change_percentage=7d%2C24h`, {
+      return fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=${state.page}&sparkline=false&price_change_percentage=7d%2C24h`, {
         method: 'get',
         headers: {
           'content-type': 'application/json',
@@ -101,7 +148,7 @@ export default {
     }
 
     function toUSD(value) {
-      return Number.isNaN(value) || value === null ? '-' : `$${value.toLocaleString()}`;
+      return Number.isNaN(value) || value === null ? '-' : `${value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 8 })}`;
     }
     function roundDecimal(val, prec) {
       const result = Math.round(Math.round(val * 10 ** ((prec || 0) + 1)) / 10) / 10 ** (prec || 0);
@@ -113,12 +160,39 @@ export default {
     }
 
     function updateHandler(e) {
-      queryParams.page = e;
+      state.page = e;
       router.push({ path, hash, query: { page: e } });
       fetchData().then((res) => res.json()).then((items) => {
         data.value = items;
         loading.value = false;
       });
+    }
+
+    function handleChangeSort(sort) {
+      const key = sortMapper.get(sort);
+      if (sortBy.value.sort === key) {
+        sortBy.value = {
+          sort: key,
+          order: !sortBy.value.order,
+        };
+      } else {
+        sortBy.value = {
+          sort: key,
+          order: true,
+        };
+      }
+    }
+
+    function handleThClass(sort) {
+      const key = sortMapper.get(sort);
+      if (sortBy.value.sort === key) {
+        if (sortBy.value.order) {
+          return 'desc';
+        }
+        return 'asc';
+      }
+
+      return '';
     }
 
     onMounted(() => {
@@ -142,10 +216,13 @@ export default {
       error,
       pages,
       toUSD,
+      sortBy,
       roundDecimal,
       toUpperCase,
       updateHandler,
-      queryParams,
+      state,
+      handleChangeSort,
+      handleThClass,
     };
   },
 };
@@ -162,6 +239,27 @@ export default {
       line-height: 14px;
       font-weight: 700;
       cursor: pointer;
+
+      &.desc::after,
+      &.asc::after {
+        display: inline-block;
+        vertical-align: middle;
+        content: '';
+        width: 0;
+        height: 0;
+        border-style: solid;
+        margin-left: 3px;
+      }
+
+      &.desc::after {
+        border-width: 5px 4px 0 4px;
+        border-color: #FFFFFF transparent transparent transparent;
+      }
+
+      &.asc::after {
+        border-width: 0px 4px 5px 4px;
+        border-color: transparent transparent #FFFFFF transparent;
+      }
     }
     td {
       font-family: Helvetica;
