@@ -4,7 +4,14 @@ import Home from '../views/Home.vue';
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    component: Home,
+  },
+  {
+    path: '/zh-TW',
+    component: Home,
+  },
+  {
+    path: '/en-US',
     component: Home,
   },
 ];

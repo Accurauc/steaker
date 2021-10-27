@@ -4,17 +4,20 @@
       <span class="label">{{ state.targetLocale.label }}</span>
       <span class="triangle"></span>
     </div>
-    <div v-if="this.isOpen"
-      @click="handleChangeLanguage(state.anotherLocale), handleLocaleClick()"
-      class="lang-select">
-      <span class="label">{{ state.anotherLocale.label }}</span>
-    </div>
+    <router-link :to="state.localePath">
+      <div v-if="this.isOpen"
+        @click="handleChangeLanguage(state.anotherLocale), handleLocaleClick()"
+        class="lang-select">
+        <span class="label">{{ state.anotherLocale.label }}</span>
+      </div>
+    </router-link>
   </div>
 </template>
 
 <script>
 import { reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 export default {
   props: {
@@ -36,13 +39,20 @@ export default {
       },
     ];
     const { locale } = useI18n();
+    const route = useRoute();
     const handleChangeLanguage = (e) => {
       locale.value = e.value;
+      sessionStorage.setItem('locale', e.value);
     };
     const state = reactive({
       locale: locale.value,
       targetLocale: computed(() => locales.find((el) => el.value === locale.value)),
       anotherLocale: computed(() => locales.find((el) => el.value !== locale.value)),
+      localePath: computed(() => {
+        const { query } = route;
+        const localObj = locales.find((el) => el.value !== locale.value);
+        return localObj.value === 'zh' ? { path: 'en-US', query } : { path: 'zh-TW', query };
+      }),
     });
 
     return {

@@ -73,11 +73,12 @@ export default {
     const error = ref(null);
     const pages = ref(100);
     const route = useRoute();
-    const routePage = route.query.page;
+    const { query, path } = route;
     const router = useRouter();
 
     const queryParams = reactive({
-      page: Number.isNaN(routePage) || routePage === undefined ? 1 : Number.parseInt(routePage, 10),
+      page: Number.isNaN(query.page)
+            || query.page === undefined ? 1 : Number.parseInt(query.page, 10),
     });
 
     function fetchData() {
@@ -113,7 +114,7 @@ export default {
 
     function updateHandler(e) {
       queryParams.page = e;
-      router.push({ path: '/', query: { page: e } });
+      router.push({ path, query: { page: e } });
       fetchData().then((res) => res.json()).then((items) => {
         data.value = items;
         loading.value = false;

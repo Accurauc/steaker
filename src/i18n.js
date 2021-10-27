@@ -1,17 +1,18 @@
 import { createI18n } from 'vue-i18n';
-
 import en from '@/assets/i18n/en.json';
 import zh from '@/assets/i18n/zh.json';
 
-let browserLanguage = window.navigator.language;
+const hashPath = window.location.hash;
+let locale = 'en';
 
-// 先塞入瀏覽器預設語言在 i18n
-if (browserLanguage.toLowerCase() === 'zh-tw') {
-  browserLanguage = 'zh';
-} else if (browserLanguage.toLowerCase() === 'en-us') {
-  browserLanguage = 'en';
+if (hashPath.includes('en-US')) {
+  locale = 'en';
+} else if (hashPath.includes('zh-TW')) {
+  locale = 'zh';
+} else if (sessionStorage.getItem('locale')) {
+  locale = sessionStorage.getItem('locale');
 } else {
-  browserLanguage = 'en';
+  locale = 'en';
 }
 
 const messages = {
@@ -20,7 +21,7 @@ const messages = {
 };
 
 const i18n = createI18n({
-  locale: browserLanguage,
+  locale,
   fallbackLocale: 'en',
   messages,
 });
