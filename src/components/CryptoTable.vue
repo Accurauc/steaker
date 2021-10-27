@@ -239,6 +239,7 @@ export default {
   table {
     margin: auto;
     min-width: 871px;
+    background: #17171A;
     th {
       font-family: Helvetica-Bold;
       font-size: 14px;

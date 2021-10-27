@@ -19,7 +19,8 @@ export default {
 
 <style scoped lang="scss">
 .home {
-  padding: 53px;
+  margin: 53px;
+  overflow: scroll;
 }
 .title {
   font-family: Helvetica-Bold;
@@ -29,5 +30,14 @@ export default {
   line-height: 24px;
   font-weight: 700;
   margin-bottom: 35px;
+}
+
+@media screen and (max-width: 414px) {
+  .home{
+    margin: 38px 16px;
+  }
+  .title {
+    white-space: break-spaces;
+  }
 }
 </style>

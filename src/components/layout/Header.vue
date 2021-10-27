@@ -27,5 +27,15 @@ export default {
     img {
       width: 190px;
     }
+  }
+
+@media screen and (max-width: 414px) {
+  header {
+    padding: 24px 16px;
+    img {
+      width: 125px;
+    }
+  }
 }
+
 </style>
