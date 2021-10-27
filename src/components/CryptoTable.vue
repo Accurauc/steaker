@@ -27,7 +27,7 @@
       <col style='width: 65px;'>
       <col style='width: 137px;'>
       <col style='width: 127px;'>
-      <col style='width: 147px;'>
+      <col style='width: 197px;'>
     </colgroup>
     <tbody>
       <tr v-for='item,index in state.sortedData' :key='index'>
@@ -46,6 +46,11 @@
           {{ roundDecimal(item.price_change_percentage_7d_in_currency, 1) }}</td>
         <td>{{ toUSD(item.market_cap) }}</td>
         <td>{{ toUSD(item.total_volume) }}</td>
+        <td><LineChart
+                :dataset="item.sparkline_in_7d.price"
+                :color="item.price_change_percentage_7d_in_currency > 0 ? '#16C784' : '#EA3943'"
+                :index='index'/>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -68,11 +73,13 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import VPagination from '@hennge/vue3-pagination';
 import '@hennge/vue3-pagination/dist/vue3-pagination.css';
+import LineChart from '@/components/LineChart.vue';
 
 export default {
   name: 'CryptoTable',
   components: {
     VPagination,
+    LineChart,
   },
   setup() {
     const data = ref([]);
@@ -130,7 +137,7 @@ export default {
 
     function fetchData() {
       loading.value = true;
-      return fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=${state.page}&sparkline=false&price_change_percentage=7d%2C24h`, {
+      return fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=${state.page}&sparkline=true&price_change_percentage=7d%2C24h`, {
         method: 'get',
         headers: {
           'content-type': 'application/json',
@@ -230,7 +237,8 @@ export default {
 
 <style scoped lang='scss'>
   table {
-    min-width: 821px;
+    margin: auto;
+    min-width: 871px;
     th {
       font-family: Helvetica-Bold;
       font-size: 14px;
