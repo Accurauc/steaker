@@ -13,23 +13,23 @@
       </tr>
     </thead>
     <colgroup>
-      <col style="width: 42px;">
-      <col style="width: 112px;">
-      <col style="width: 129px;">
-      <col style="width: 61px;">
-      <col style="width: 65px;">
-      <col style="width: 137px;">
-      <col style="width: 127px;">
-      <col style="width: 147px;">
+      <col style='width: 42px;'>
+      <col style='width: 112px;'>
+      <col style='width: 129px;'>
+      <col style='width: 61px;'>
+      <col style='width: 65px;'>
+      <col style='width: 137px;'>
+      <col style='width: 127px;'>
+      <col style='width: 147px;'>
     </colgroup>
     <tbody>
-      <tr v-for="item,index in data" :key="index">
+      <tr v-for='item,index in data' :key='index'>
         <td>{{ item.market_cap_rank }}</td>
         <td>
-          <img :src="item.image" :alt="item.symbol">
-          <div class="detail">
-            <div class="name">{{ item.name }}</div>
-            <div class="symbol">{{ toUpperCase(item.symbol) }}</div>
+          <img :src='item.image' :alt='item.symbol'>
+          <div class='detail'>
+            <div class='name'>{{ item.name }}</div>
+            <div class='symbol'>{{ toUpperCase(item.symbol) }}</div>
           </div>
         </td>
         <td>{{ toUSD(item.current_price) }}</td>
@@ -40,29 +40,42 @@
       </tr>
     </tbody>
   </table>
+  <div v-show="!loading" class='wrapper'>
+    <v-pagination
+      v-model='queryParams.page'
+      :pages='pages'
+      :range-size='1'
+      active-color='#DCEDFF'
+      @update:modelValue='updateHandler'
+    />
+  </div>
 </template>
 
 <script>
 import {
   ref, onMounted,
-  reactive, watchEffect,
+  reactive,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import VPagination from '@hennge/vue3-pagination';
+import '@hennge/vue3-pagination/dist/vue3-pagination.css';
 
 export default {
   name: 'CryptoTable',
+  components: {
+    VPagination,
+  },
   setup() {
     const data = ref(null);
     const loading = ref(true);
     const error = ref(null);
+    const pages = ref(100);
     const route = useRoute();
+    const router = useRouter();
 
     const queryParams = reactive({
-      page: route.query.page || 1,
-      // anotherLocale: computed(() => locales.find((el) => el.value !== locale.value)),
+      page: Number.isNaN(route.query.page) ? 1 : Number.parseInt(route.query.page, 10),
     });
-
-    watchEffect(() => console.log(queryParams.page));
 
     function fetchData() {
       loading.value = true;
@@ -71,38 +84,20 @@ export default {
         headers: {
           'content-type': 'application/json',
         },
-      })
-        .then((res) => {
-          // a non-200 response code
-          if (!res.ok) {
-            // create error instance with HTTP status text
-            const resError = new Error(res.statusText);
-            resError.json = res.json();
-            throw error;
-          }
-
-          return res.json();
-        })
-        .then((json) => {
-          data.value = json;
-        })
-        .catch((err) => {
-          error.value = err;
-          // In case a custom JSON error response was provided
-          if (err.json) {
-            return err.json.then((json) => {
-              // set the JSON response message
-              error.value.message = json.message;
-            });
-          }
-          return err;
-        })
-        .then(() => {
-          loading.value = false;
-        });
+      });
     }
+
+    function fetchList() {
+      return fetch('https://api.coingecko.com/api/v3/coins/list', {
+        method: 'get',
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    }
+
     function toUSD(value) {
-      return `$${value.toLocaleString()}`;
+      return Number.isNaN(value) || value === null ? '-' : `$${value.toLocaleString()}`;
     }
     function roundDecimal(val, prec) {
       const result = Math.round(Math.round(val * 10 ** ((prec || 0) + 1)) / 10) / 10 ** (prec || 0);
@@ -113,23 +108,46 @@ export default {
       return string.toUpperCase();
     }
 
+    function updateHandler(e) {
+      queryParams.page = e;
+      router.push({ path: '/', query: { page: e } });
+      fetchData().then((res) => res.json()).then((items) => {
+        data.value = items;
+        loading.value = false;
+      });
+    }
+
     onMounted(() => {
-      fetchData();
+      Promise.all([
+        fetchList(),
+        fetchData(),
+      ]).then(async ([listRes, dataRes]) => {
+        const list = await listRes.json();
+        const items = await dataRes.json();
+        return [list, items];
+      }).then(([list, items]) => {
+        data.value = items;
+        loading.value = false;
+        pages.value = Math.ceil(list.length / 100);
+      });
     });
 
     return {
       data,
       loading,
       error,
+      pages,
       toUSD,
       roundDecimal,
       toUpperCase,
+      updateHandler,
+      queryParams,
     };
   },
 };
 </script>
 
-<style scoped lang="scss">
+<style scoped lang='scss'>
   table {
     min-width: 821px;
     th {
@@ -192,5 +210,12 @@ export default {
         text-align: right;
       }
     }
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
   }
 </style>
