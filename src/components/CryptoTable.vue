@@ -33,8 +33,10 @@
           </div>
         </td>
         <td>{{ toUSD(item.current_price) }}</td>
-        <td>{{ roundDecimal(item.price_change_percentage_24h_in_currency, 1) }}</td>
-        <td>{{ roundDecimal(item.price_change_percentage_7d_in_currency, 1) }}</td>
+        <td class="trian" :class="item.price_change_percentage_24h_in_currency > 0 ? 'up' : 'down'">
+          {{ roundDecimal(item.price_change_percentage_24h_in_currency, 1) }}</td>
+        <td class="trian" :class="item.price_change_percentage_7d_in_currency > 0 ? 'up' : 'down'">
+          {{ roundDecimal(item.price_change_percentage_7d_in_currency, 1) }}</td>
         <td>{{ toUSD(item.market_cap) }}</td>
         <td>{{ toUSD(item.total_volume) }}</td>
       </tr>
@@ -102,7 +104,7 @@ export default {
     }
     function roundDecimal(val, prec) {
       const result = Math.round(Math.round(val * 10 ** ((prec || 0) + 1)) / 10) / 10 ** (prec || 0);
-      return `${result}%`;
+      return `${Math.abs(result)}%`;
     }
 
     function toUpperCase(string) {
@@ -167,6 +169,33 @@ export default {
       letter-spacing: 0;
       font-weight: 400;
       padding: 20px 0px;
+
+      &.trian {
+        &::before {
+            display: inline-block;
+            vertical-align: middle;
+            content: '';
+            width: 0;
+            height: 0;
+            border-style: solid;
+            margin-right: 3px;
+        }
+        &.up {
+          color: #16C784;
+          &::before {
+            border-width: 0px 4px 5px 4px;
+            border-color: transparent transparent #16C784 transparent;
+          }
+        }
+
+        &.down {
+          color: #EA3943;
+          &::before {
+            border-width: 5px 4px 0 4px;
+            border-color: #EA3943 transparent transparent transparent;
+          }
+        }
+      }
     }
 
     th, td {
