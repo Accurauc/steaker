@@ -21,7 +21,7 @@ export default {
 .home {
   min-height: calc(100vh - 217px);
   margin: 53px;
-  overflow: scroll;
+  overflow: auto;
 }
 .title {
   font-family: Helvetica-Bold;

@@ -244,8 +244,10 @@ export default {
 
 <style scoped lang='scss'>
   table {
+    table-layout: fixed;
     margin: auto;
-    min-width: 912px;
+    width: 100%;
+    max-width: 912px;
     background: #17171A;
     th {
       font-family: Helvetica-Bold;
@@ -320,6 +322,7 @@ export default {
         text-align: center;
       }
       &:nth-child(2) {
+        text-align: left;
         .td-wrapper {
           text-align: left;
           display: flex;
