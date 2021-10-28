@@ -1,5 +1,5 @@
 <template>
-  <table>
+  <table v-if="!loading">
     <thead>
       <tr>
         <th :class="handleThClass('rank')"
@@ -33,10 +33,12 @@
       <tr v-for='item,index in state.sortedData' :key='index'>
         <td>{{ item.market_cap_rank }}</td>
         <td>
-          <img :src='item.image' :alt='item.symbol'>
-          <div class='detail'>
-            <div class='name'>{{ item.name }}</div>
-            <div class='symbol'>{{ toUpperCase(item.symbol) }}</div>
+          <div class="td-wrapper">
+            <img :src='item.image' :alt='item.symbol'>
+            <div class='detail'>
+              <div class='name'>{{ item.name }}</div>
+              <div class='symbol'>{{ toUpperCase(item.symbol) }}</div>
+            </div>
           </div>
         </td>
         <td>{{ toUSD(item.current_price) }}</td>
@@ -54,6 +56,7 @@
       </tr>
     </tbody>
   </table>
+  <loading v-else/>
   <div class='wrapper'>
     <v-pagination
       v-model='state.page'
@@ -74,12 +77,14 @@ import { useRoute, useRouter } from 'vue-router';
 import VPagination from '@hennge/vue3-pagination';
 import '@hennge/vue3-pagination/dist/vue3-pagination.css';
 import LineChart from '@/components/LineChart.vue';
+import Loading from '@/components/Loading.vue';
 
 export default {
   name: 'CryptoTable',
   components: {
     VPagination,
     LineChart,
+    Loading,
   },
   setup() {
     const data = ref([]);
@@ -155,7 +160,9 @@ export default {
     }
 
     function toUSD(value) {
-      return Number.isNaN(value) || value === null ? '-' : `${value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 8 })}`;
+      return Number.isNaN(value) || value === null ? '-' : `${value.toLocaleString('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 8,
+      })}`;
     }
     function roundDecimal(val, prec) {
       const result = Math.round(Math.round(val * 10 ** ((prec || 0) + 1)) / 10) / 10 ** (prec || 0);
@@ -313,31 +320,32 @@ export default {
         text-align: center;
       }
       &:nth-child(2) {
-        text-align: left;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        img {
-          width: 24px;
-          height: 24px;
-        }
-        .detail {
-          margin-left: 7px;
-          .symbol {
-            font-family: Helvetica;
-            font-size: 12px;
-            color: #929292;
-            letter-spacing: 0;
-            font-weight: 400;
-            margin-top: 2px;
+        .td-wrapper {
+          text-align: left;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          img {
+            width: 24px;
+            height: 24px;
           }
-
-          .name {
-            font-family: Helvetica-Bold;
-            font-size: 16px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            font-weight: 700;
+          .detail {
+            margin-left: 7px;
+            .symbol {
+              font-family: Helvetica;
+              font-size: 12px;
+              color: #929292;
+              letter-spacing: 0;
+              font-weight: 400;
+              margin-top: 2px;
+            }
+            .name {
+              font-family: Helvetica-Bold;
+              font-size: 16px;
+              color: #FFFFFF;
+              letter-spacing: 0;
+              font-weight: 700;
+            }
           }
         }
       }
@@ -351,6 +359,10 @@ export default {
   }
 
   .wrapper {
+    width: 100%;
+    position: absolute;
+    left: 0px;
+    bottom: 70px;
     display: flex;
     flex-direction: row;
     align-items: center;

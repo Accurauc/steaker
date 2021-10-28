@@ -19,6 +19,7 @@ export default {
 
 <style scoped lang="scss">
 .home {
+  min-height: calc(100vh - 217px);
   margin: 53px;
   overflow: scroll;
 }
