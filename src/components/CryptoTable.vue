@@ -1,5 +1,15 @@
 <template>
   <table v-if="!loading">
+    <colgroup>
+      <col style='width: 42px;'>
+      <col style='width: 112px;'>
+      <col style='width: 129px;'>
+      <col style='width: 70px;'>
+      <col style='width: 75px;'>
+      <col style='width: 137px;'>
+      <col style='width: 150px;'>
+      <col style='width: 197px;'>
+    </colgroup>
     <thead>
       <tr>
         <th :class="handleThClass('rank')"
@@ -19,16 +29,6 @@
         <th>{{ $t('l7d') }}</th>
       </tr>
     </thead>
-    <colgroup>
-      <col style='width: 42px;'>
-      <col style='width: 112px;'>
-      <col style='width: 129px;'>
-      <col style='width: 70px;'>
-      <col style='width: 75px;'>
-      <col style='width: 137px;'>
-      <col style='width: 150px;'>
-      <col style='width: 197px;'>
-    </colgroup>
     <tbody>
       <tr v-for='item,index in state.sortedData' :key='index'>
         <td>{{ item.market_cap_rank }}</td>
