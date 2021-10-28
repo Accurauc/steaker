@@ -62,7 +62,7 @@
       v-model='state.page'
       :pages='pages'
       :range-size='1'
-      active-color='#DCEDFF'
+      active-color='#6188FF'
       @update:modelValue='updateHandler'
     />
   </div>
@@ -247,8 +247,9 @@ export default {
     table-layout: fixed;
     margin: auto;
     width: 100%;
-    max-width: 912px;
+    min-width: 912px;
     background: #17171A;
+    border-collapse: collapse;
     th {
       font-family: Helvetica-Bold;
       font-size: 14px;
@@ -359,6 +360,14 @@ export default {
         text-align: right;
       }
     }
+
+    tbody tr {
+      cursor: pointer;
+      border-bottom: 1px solid #222531;
+      &:hover {
+        background: #171924;
+      }
+    }
   }
 
   .wrapper {
@@ -371,4 +380,33 @@ export default {
     align-items: center;
     justify-content: center;
   }
+  @media screen and (max-width: 414px) {
+    .wrapper {
+      bottom: 76px;
+    }
+  }
+</style>
+
+<style lang="scss">
+//override v-pagination css
+.Page {
+  color: #606266;
+  &:hover {
+    border-color: #6188FF;
+  }
+}
+
+.Page-active {
+  color: #FFFFFF;
+  border-color: #6188FF;
+}
+
+.Control {
+  fill: #606266;;
+}
+
+.Control-active,
+.Control-active:hover {
+  fill: #C0C4CC;;
+}
 </style>
