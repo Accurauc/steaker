@@ -1,5 +1,6 @@
 {
-    "title": "Cryptocurrency Prices by Market Cap",
+    "title-1": "Cryptocurrency Prices",
+    "title-2": "by Market Cap",
     "name": "Name",
     "price": "Price",
     "24h": "24h%",

@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <div class="title">{{ $t('title') }}</div>
+    <div class="title">{{ $t('title-1') }}<span>{{ $t('title-2') }}</span></div>
     <CryptoTable />
   </div>
 </template>
@@ -39,6 +39,9 @@ export default {
   }
   .title {
     white-space: break-spaces;
+    span {
+      display: inline-block;
+    }
   }
 }
 </style>
