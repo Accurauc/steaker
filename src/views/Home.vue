@@ -39,6 +39,7 @@ export default {
   }
   .title {
     white-space: break-spaces;
+    line-height: 30px;
     span {
       display: inline-block;
     }
